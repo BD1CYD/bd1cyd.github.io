@@ -6,237 +6,329 @@
     <title>BD1CYD | Amateur Radio Station</title>
     <style>
         :root {
-            --primary-color: #007AFF;
-            --bg-dark: #0a0a0c;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --text-main: #ffffff;
-            --text-dim: #a0a0a0;
+            --primary: #007AFF;
+            --accent: #00d4ff;
+            --bg: #050507;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-dim: #999;
         }
 
+        * { margin: 0; padding: 0; box-box: border-box; }
+
         body {
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            line-height: 1.6;
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 40px 40px;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* 动态背景 */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #050507 100%);
         }
 
         .container {
-            max-width: 900px;
+            max-width: 850px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 60px 20px;
         }
 
-        /* Header Section */
+        /* 头部设计 */
         header {
             text-align: center;
-            padding: 60px 0;
+            margin-bottom: 50px;
         }
 
-        h1 {
-            font-size: 4rem;
-            letter-spacing: 5px;
-            margin: 0;
-            background: linear-gradient(135deg, #fff 0%, #555 100%);
+        .callsign {
+            font-size: clamp(3rem, 10vw, 5rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(180deg, #fff 30%, #555 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
+            margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            margin-top: 10px;
+        .tagline {
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
 
-        /* Glass Card */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* 通用卡片样式 */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 40px;
-            margin-bottom: 30px;
-            transition: transform 0.3s ease;
+            padding: 35px;
+            margin-bottom: 25px;
+            transition: all 0.4s ease;
         }
 
-        .card:hover {
+        .glass-card:hover {
+            border-color: rgba(0, 122, 255, 0.3);
             transform: translateY(-5px);
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        /* Content Styles */
         h2 {
-            font-size: 1.5rem;
-            border-left: 4px solid var(--primary-color);
-            padding-left: 15px;
-            margin-bottom: 25px;
-        }
-
-        .info-item {
-            margin-bottom: 15px;
-        }
-
-        .label {
-            color: var(--text-dim);
-            font-size: 0.85rem;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .value {
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .bio {
             font-size: 1.2rem;
-            line-height: 1.8;
-            color: #ddd;
-        }
-
-        /* QSL Section */
-        .qsl-gallery {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .qsl-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            border: 1px dashed rgba(255,255,255,0.2);
-        }
-
-        .img-placeholder {
-            width: 100%;
-            aspect-ratio: 1.6/1;
-            background: #1a1a1a;
-            border-radius: 8px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: #444;
-            margin-bottom: 15px;
+            gap: 10px;
+            color: var(--accent);
         }
 
-        /* Button */
+        /* 倒计时样式 */
+        .countdown-grid {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .time-unit .num {
+            display: block;
+            font-size: 2.5rem;
+            font-family: "Courier New", monospace;
+            font-weight: bold;
+        }
+
+        .time-unit .label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+        }
+
+        .progress-container {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 1s ease;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        /* QSL 网格 */
+        .qsl-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .qsl-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .qsl-item img {
+            width: 100%;
+            display: block;
+            aspect-ratio: 1.6/1;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .qsl-item:hover img { transform: scale(1.05); }
+
+        .qsl-label {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 8px;
+            font-size: 0.7rem;
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* 信息行 */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child { border: none; }
+
+        .key { color: var(--text-dim); font-size: 0.9rem; }
+        .val { font-weight: 500; font-family: monospace; }
+
         .btn {
-            display: inline-block;
-            background: var(--primary-color);
+            display: block;
+            width: 100%;
+            padding: 15px;
+            text-align: center;
+            background: var(--primary);
             color: white;
             text-decoration: none;
-            padding: 12px 30px;
-            border-radius: 50px;
+            border-radius: 12px;
             font-weight: 600;
             margin-top: 20px;
-            transition: background 0.3s;
+            transition: 0.3s;
         }
 
-        .btn:hover {
-            background: #005ecb;
-            box-shadow: 0 0 20px rgba(0,122,255,0.4);
-        }
+        .btn:hover { background: #005ecb; box-shadow: 0 0 20px rgba(0,122,255,0.4); }
 
         footer {
             text-align: center;
+            padding: 40px;
             color: var(--text-dim);
-            padding: 40px 0;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
         }
 
         @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .qsl-gallery { grid-template-columns: 1fr; }
+            .qsl-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+<canvas id="bg-canvas"></canvas>
+
 <div class="container">
     <header>
-        <h1>BD1CYD</h1>
-        <div class="subtitle">AMATEUR RADIO STATION · CHINA</div>
+        <div class="callsign">BD1CYD</div>
+        <div class="tagline">Haidian · Beijing · China</div>
     </header>
 
-    <!-- Bio Card -->
-    <div class="card">
-        <p class="bio">
-            这里是 <strong>BD1CYD</strong>，一位来自北京海淀的初三学子。<br>
-            感谢您在电波中拨冗通联。每一次信号的跳动都是跨越空间的握手。<br>
-            期待可以与您在空中常见！<strong>73!</strong>
+    <!-- 个人介绍 -->
+    <div class="glass-card">
+        <p style="font-size: 1.1rem; line-height: 1.8; color: #ddd;">
+            这里是 <strong>BD1CYD</strong>，一位海淀初三牲。<br>
+            感谢您的通联。期待可以与您在空中常见！73！
         </p>
     </div>
 
-    <div class="grid">
-        <!-- Contact Card -->
-        <div class="card">
-            <h2>Station Info</h2>
-            <div class="info-item">
-                <span class="label">Operator</span>
-                <span class="value">李 沛轩 (Peixuan Li)</span>
-            </div>
-            <div class="info-item">
-                <span class="label">Frequency</span>
-                <span class="value">438.500MHz / 昌平中继</span>
-            </div>
-            <div class="info-item">
-                <span class="label">Location</span>
-                <span class="value">北京市海淀区永泰庄北路40号院3单元1801室</span>
-            </div>
+    <!-- 中考倒计时 -->
+    <div class="glass-card">
+        <h2>COUNTDOWN / 2026中考</h2>
+        <div class="countdown-grid">
+            <div class="time-unit"><span id="days" class="num">--</span><span class="label">DAYS</span></div>
+            <div class="time-unit"><span id="hours" class="num">--</span><span class="label">HOURS</span></div>
+            <div class="time-unit"><span id="mins" class="num">--</span><span class="label">MINS</span></div>
         </div>
-
-        <!-- Connection Card -->
-        <div class="card">
-            <h2>Connectivity</h2>
-            <div class="info-item">
-                <span class="label">Email</span>
-                <span class="value">peixuanli2011@163.com</span>
-            </div>
-            <div class="info-item">
-                <span class="label">WeChat / QQ</span>
-                <span class="value">BD1CYD / 1720110112</span>
-            </div>
-            <div class="info-item">
-                <span class="label">QSL Exchange</span>
-                <span class="value">无需邮资，平信回寄</span>
-            </div>
+        <div class="progress-container">
+            <div id="progress" class="progress-fill"></div>
         </div>
+        <p style="text-align: right; font-size: 0.7rem; color: var(--text-dim); margin-top: 8px;">Target: 2026.06.24</p>
     </div>
 
-    <!-- QSL Exchange Card -->
-    <div class="card" style="text-align: center;">
-        <h2>QSL Card Exchange</h2>
-        <p>欢迎交换电子或纸质卡片，请点击下方按钮填写登记表单</p>
-        <a href="#" class="btn">QSL卡登记表单</a>
-        
-        <div class="qsl-gallery" style="margin-top: 40px;">
-            <div class="qsl-card">
-                <div class="img-placeholder">IMAGE PREVIEW</div>
-                <span class="label">当前发行版本 (Current)</span>
-            </div>
-            <div class="qsl-card">
-                <div class="img-placeholder">IMAGE PREVIEW</div>
-                <span class="label">旧版存盘 (Archive)</span>
-            </div>
+    <!-- 电台信息 -->
+    <div class="glass-card">
+        <h2>STATION INFO</h2>
+        <div class="info-row"><span class="key">Operator</span><span class="val">李 沛轩</span></div>
+        <div class="info-row"><span class="key">Frequency</span><span class="val">438.500MHz / 昌平中继</span></div>
+        <div class="info-row"><span class="key">Location</span><span class="val">海淀区永泰庄北路40号院</span></div>
+        <div class="info-row"><span class="key">Postcode</span><span class="val">100192</span></div>
+    </div>
+
+    <!-- QSL 卡片 -->
+    <div class="glass-card">
+        <h2>QSL GALLERY</h2>
+        <div class="qsl-grid">
+            <div class="qsl-item"><img src="qsl1.jpg"><div class="qsl-label">Current Edition 01</div></div>
+            <div class="qsl-item"><img src="qsl2.jpg"><div class="qsl-label">Current Edition 02</div></div>
+            <div class="qsl-item"><img src="qsl3.jpg"><div class="qsl-label">Current Edition 03</div></div>
+            <div class="qsl-item"><img src="qsl4.jpg"><div class="qsl-label">Current Edition 04</div></div>
         </div>
+        <a href="https://forms.office.com/r/dLiZuSskNK" class="btn">QSL卡交换登记</a>
+    </div>
+
+    <!-- 联系方式 -->
+    <div class="glass-card">
+        <h2>CONNECTIVITY</h2>
+        <div class="info-row"><span class="key">Email</span><span class="val">peixuanli2011@163.com</span></div>
+        <div class="info-row"><span class="key">QQ</span><span class="val">1720110112</span></div>
+        <div class="info-row"><span class="key">WeChat</span><span class="val">BD1CYD</span></div>
     </div>
 
     <footer>
-        &copy; 2026 BD1CYD · Amateur Radio Station · 73 de BD1CYD
+        73 DE BD1CYD | POWERED BY GITHUB PAGES
     </footer>
 </div>
+
+<script>
+    // 背景动画
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        stars = [];
+        for (let i = 0; i < 150; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 1.5,
+                opacity: Math.random()
+            });
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white";
+        stars.forEach(s => {
+            ctx.globalAlpha = s.opacity;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fill();
+            s.opacity += (Math.random() - 0.5) * 0.05;
+            if (s.opacity < 0) s.opacity = 0;
+            if (s.opacity > 1) s.opacity = 1;
+        });
+        requestAnimationFrame(draw);
+    }
+
+    // 倒计时逻辑
+    function updateTimer() {
+        const target = new Date('2026-06-24T08:00:00').getTime();
+        const start = new Date('2025-09-01T08:00:00').getTime();
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+        document.getElementById('days').innerText = d;
+        document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+        document.getElementById('mins').innerText = m.toString().padStart(2, '0');
+
+        const progress = ((now - start) / (target - start)) * 100;
+        document.getElementById('progress').style.width = Math.min(Math.max(progress, 0), 100) + '%';
+    }
+
+    window.addEventListener('resize', initCanvas);
+    initCanvas();
+    draw();
+    setInterval(updateTimer, 1000);
+    updateTimer();
+</script>
 
 </body>
 </html>
